@@ -1,0 +1,254 @@
+---
+title: "Uvod u R - Sesija04"
+author:
+- name: Goran S. Milovanović, PhD
+  affiliation: DataKolektiv, Data Scientist & Vlasnik
+output:
+  html_document:
+    df_print: paged
+---
+
+![](DK_Logo_White_150.png)
+
+***
+# Sesija 04: Funkcije i osnove funkcionalnog programiranja u R
+ 
+**Fidbek** se upućuje na `goran.milovanovic@datakolektiv.com`. 
+Ova sveščica prati kurs Uvod u R programiranje za analizu podataka 2020/21.
+
+***
+
+U Sesiji 04 bavimo se samom suštinom programskog jezika R: funkcijama i funkcionalnim programiranjem. Zahvaljujući razvojima moćnih paketa za manipulaciju podacima poput {dplyr} i {data.table}, R programer se u praksi retko sreće sa pravim funkcionalnim programiranjem - ali ono je neizostavan deo njegovog obrazovanja. Jednostavno postoje situacije u kojima će dan spasti zaista samo primena `Map()` ili `Reduce()` - funkcija koje rade sa *drugim* R funkcijama i omogućavaju elegantne transformacije podataka i izračunavanja izražene u tek ponekoj liniji koda. Da ne pominjemo `apply()` familiju funkcija bez koje nema pomena ozbiljnog rada u programskom jeziku R.
+
+### 0. Funkcije u R
+
+Videli smo već pregršt funkcija koje dolaze sa programskim jezikom R. Sada ćemo početi da pišemo naše funkcije: ništa lakše! Evo funkcije koja vraća zbir kvadrata vektora brojeva:
+
+```{r echo = T, eval = T, message = F}
+sum_squares <- function(x) {
+  
+  ss <- sum(x^2)
+  return(ss)
+  
+}
+```
+
+Hajde da je primenimo na neki vektor:
+
+```{r echo = T, eval = T, message = F}
+a <- seq(1, 10, by = 1)
+print(sum_squares(a))
+```
+
+Uvođenje dodatnih argumenata: funkcija koja po odluci korisnika računa samo sumu kvadrata parnih brojeva u vektoru:
+
+```{r echo = T, eval = T, message = F}
+sum_squares_1 <- function(x, even_only = FALSE) {
+  
+  if (!even_only) {
+   
+    ss <- sum(x^2)
+    return(ss)
+    
+  } else {
+    
+    w <- which(x %% 2 == 0)
+    if (length(w) > 0) {
+      
+      x <- x[w]
+      ss <- sum(x^2)
+      return(ss)
+       
+    } else {
+      
+      message("No even numbers detected while even_only == TRUE")
+      return(NULL)
+    }
+    
+  }
+  
+}
+```
+
+Primena funkcije `sum_squares_1()`:
+
+```{r echo = T, eval = T, message = F}
+a <- seq(1, 10, by = 1)
+print(sum_squares_1(a, even_only = FALSE))
+```
+
+```{r echo = T, eval = T, message = F}
+a <- seq(1, 10, by = 1)
+print(sum_squares_1(a, even_only = TRUE))
+```
+
+```{r echo = T, eval = T, message = F}
+a <- seq(1, 11, by = 2)
+print(sum_squares_1(a, even_only = TRUE))
+```
+
+Šta se dešava ako prosledimo karakter umesto numeričkog vektora?
+
+```{r echo = T, eval = F, message = F}
+a <- c("Belgrade", "New York", "Paris")
+print(sum_squares_1(a, even_only = TRUE))
+```
+
+Ali to teško da korisniku naše funkcije nešto znači; zbog toga funkcije pišemo tako da proveravaju vrednosti i tipove svojih argumenata i obaveste korisnika jasno ako pokušava da uradi nešto što funkcija ne predviđa:
+
+```{r echo = T, eval = T, message = F}
+sum_squares_2 <- function(x, even_only = FALSE) {
+  
+  if (!is.numeric(x)) {
+    
+    message("In sum_squares_2(): x must be numeric.")
+    return(NULL)
+    
+    
+  }
+  
+  if (!even_only) {
+   
+    ss <- sum(x^2)
+    return(ss)
+    
+  } else {
+    
+    w <- which(x %% 2 == 0)
+    if (length(w) > 0) {
+      
+      x <- x[w]
+      ss <- sum(x^2)
+      return(ss)
+       
+    } else {
+      
+      message("No even numbers detected while even_only == TRUE")
+      return(NULL)
+    }
+    
+  }
+  
+}
+```
+
+Primena:
+
+```{r echo = T, eval = T, message = F}
+a <- c("Belgrade", "New York", "Paris")
+print(sum_squares_2(a, even_only = TRUE))
+```
+
+### 1. `apply()`, `lapply()`, i `sapply()`
+
+Napisali smo funkciju `sum_squares_2()` koja se primenjuje na jedan vektor `x`. Hoćemo da je primenimo na neki N broj vektora i pokupimo sve sume kvadrata brojeva u njima. Videli smo `lapply()` već u akciji:
+
+```{r echo = T, eval = T, message = F}
+a1 <- seq(1, 20, by = 1)
+a2 <- seq(21, 40, by = 1)
+a3 <- seq(41, 60, by = 1)
+input_list <- list(a1, a2, a3)
+result_list <- lapply(input_list, sum_squares_2, even_only = TRUE)
+print(result_list)
+```
+
+I rezultat je lista, što je posledica primene `lapply()`; podsetimo se, ako umesto nje primenimo njenu sestru, funkciju `sapply()`, rezultat će biti vektor - verovatno mnogo zgodnije za izračunavanja:
+
+```{r echo = T, eval = T, message = F}
+a1 <- seq(1, 20, by = 1)
+a2 <- seq(21, 40, by = 1)
+a3 <- seq(41, 60, by = 1)
+input_list <- list(a1, a2, a3)
+result_list <- sapply(input_list, sum_squares_2, even_only = TRUE)
+print(result_list)
+```
+
+Funkcija `apply()` se koristi na matricama i multidimenzionalnim nizovima u R.
+
+```{r echo = T, eval = T, message = F}
+my_matrix <- matrix(1:9, 
+                    nrow = 3)
+print(my_matrix)
+```
+
+Sume redova u `my_matrix` matrici uz pomoć `apply()`:
+
+```{r echo = T, eval = T, message = F}
+apply(my_matrix, 1, sum)
+```
+
+Sume kolona u `my_matrix` matrici uz pomoć `apply()`:
+
+```{r echo = T, eval = T, message = F}
+apply(my_matrix, 2, sum)
+```
+
+Naravno, kao jezik specijalizovan za matematičku statistiku u kojoj linearne algebre ima do guše, R ima i već spremne funkcije za sume kolona i redova matrica:
+
+```{r echo = T, eval = T, message = F}
+rowSums(my_matrix)
+```
+
+```{r echo = T, eval = T, message = F}
+colSums(my_matrix)
+```
+
+### 2. `Map()`
+
+Funkcija `Map()` se primenjuje na funkcije *dva argumenta* poput funkcije `map_me_fun()` u sledećim redovima: 
+
+```{r echo = T, eval = T, message = F}
+map_me_fun <- function (x, y) {
+  
+  return(x + y)
+  
+}
+```
+
+Definišemo sada dva vektora brojeva i prosledimo ih kao argumente R funkciji `Map()`:
+
+```{r echo = T, eval = T, message = F}
+a <- c(1, 2, 3, 4, 5)
+b <- c(6, 7, 8, 9, 10)
+
+Map(map_me_fun, a, b)
+```
+
+**Ne zaboravite** na recycling u R! Primer:
+
+```{r echo = T, eval = T, message = F}
+a <- c(1, 2, 3, 4, 5)
+b <- c(6, 7, 8, 9)
+
+Map(map_me_fun, a, b)
+```
+
+### 3. `Reduce()`
+
+Funkcija `Reduce()` radi sledeću stvar: primenjena na funkciju dva argumenta i vektor ili listu, prvo primenjuje datu funkciju na prva dva elementa vektora ili liste, uzima rezultat te primene i sledeći element vektora ili liste, primenjuje na ta dva, uzima rezultat i sledeći element vektora ili liste, primenjuje... i tako do kraja vektora ili liste!
+
+```{r echo = T, eval = T, message = F}
+nums <- c(1, 2, 3, 4)
+Reduce('^', nums)
+```
+
+Pa da. Ali:
+
+```{r echo = T, eval = T, message = F}
+nums <- c(4, 3, 2, 1)
+Reduce('^', nums)
+```
+
+Da proverimo?
+
+```{r echo = T, eval = T, message = F}
+((4^3)^2)^1
+```
+
+To je to :)
+
+
+### R Markdown
+
+[R Markdown](https://rmarkdown.rstudio.com/) je ono što koristimo da bismo razvili ove sveščice. Evo knjige iz koje se može naučiti rad u toj jednostavnoj ekstenziji R: [R Markdown: The Definitive Guide, Yihui Xie, J. J. Allaire, Garrett Grolemunds.](https://bookdown.org/yihui/rmarkdown/). 
+

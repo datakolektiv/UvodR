@@ -1,0 +1,114 @@
+---
+title: "Uvod u R - Sesija00"
+author:
+- name: Goran S. Milovanović, PhD
+  affiliation: DataKolektiv, Data Scientist & Vlasnik
+---
+
+![](DK_Logo_White_150.png)
+
+***
+# Sesija 00: Instalacije i prvi potezi u programskom jeziku R
+ 
+**Fidbek** se upućuje na `goran.milovanovic@datakolektiv.com`. 
+Ova sveščica prati kurs Uvod u R programiranje za analizu podataka 2020/21.
+
+***
+
+Na uvodnoj sesiji bavićemo se preduslovima za naš rad u programskom jeziku R: 
+
+- instalacijom interpretera za programski jezik R 
+- instalacijom RStudio Dekstop IDE za razvoj u Data Science (podržava R, Python, i druge jezike)
+- organizacijom rada u tipičnom Data Science projektu.
+
+Tokom kursa, najviše ćemo se oslanjati na knjigu [R for Data Science](https://r4ds.had.co.nz/index.html) autora Hadley Wickham i Garrett Grolemund. Knjiga je kompletno otvorena online, a postoji i srpski prevod u paperback izdanju. Tu i tamo ćemo se oslanjati i na druge materijale - svi su besplatno dostupni. 
+
+### 0. Instalacije
+
+Sledeći linkovi sadrže objašnjenja kako instalirati R i RStudio razvojno okruženje:ß
+
+1. [Instrukcije za instalaciju interpretera za programski jezik R (Windows, Linux, macOS)](https://www.datacamp.com/community/tutorials/installing-R-windows-mac-ubuntu)
+2. [Instrukcije za instalaciju RStudio razvojnog okruženja (Windows, Linux, macOS)](https://www.udemy.com/tutorial/machinelearning/installing-r-and-r-studio-mac-linux-windows/)
+
+
+### 1. Prvi koraci
+
+```{r echo = T, eval = F, message = F}
+print("Hello World.")
+```
+
+Operator dodele u R je `<-`:
+
+```{r echo = T, eval = F, message = F}
+a <- 5
+print(a)
+```
+
+U svrhu dodele vrednosti promenljivoj možemo da koristimo i uobičajeniji znak jednakosti kao u `a = 5`, ali u R to po konvenciji **ne radimo**:
+
+```{r echo = T, eval = F, message = F}
+a = 5
+print(a)
+```
+
+Da li su dve stvari jednake?
+
+```{r echo = T, eval = F, message = F}
+a <- 5
+b <- 7
+print(a == b)
+```
+
+Karakteri:
+
+```{r echo = T, eval = F, message = F}
+string <- "Beograd"
+print(string)
+```
+
+Funkcije u R: npr. `nchar()` nam kaže koliko karaktera postoji u stringu `string`:
+
+```{r echo = T, eval = F, message = F}
+nchar(string)
+```
+
+R je **vektorizovan** programski jezik (pored toga što je funkcionalni programski jezik, ali takođe i multiparadigmatski jer u njemu programiramo i objektno orijentisano, strukturalno, itd):
+
+```{r echo = T, eval = F, message = F}
+a <- c(1, 2, 3)
+a + 1
+```
+
+```{r echo = T, eval = F, message = F}
+a <- c(1, 2, 3)
+b <- c(2, 2, 2)
+a + b
+```
+
+```{r echo = T, eval = F, message = F}
+a ^ b
+```
+
+Mehanizam **recikliranja** vektora u R:
+
+```{r echo = T, eval = F, message = F}
+a <- c(1, 2, 3)
+a + 1
+```
+
+```{r echo = T, eval = F, message = F, warning = FALSE}
+a <- c(1, 2, 3)
+b <- c(2, 4)
+a + b
+```
+
+**Nikad** ne zaboravite na recikliranje u R, ono je automatsko. Recikliranje može biti veoma korisno u razvoju R koda ali takođe i opasno, jer ako grešite u recikliranju po pravilu dobijate samo *warning* što nije isto što i *error*: prvo ne zaustavlja egzekuciju koda, drugo da, iz čega slede da možete da napišete kod koji pogrešno radi a ne budete svesni toga dok ne proučite pažljivo njegove rezultate.
+
+### Čitanje za narednu sesiju
+
+- Poglavlja 1 - 4 iz [R for Data Science, Hadley Wickham & Garrett Grolemund](https://r4ds.had.co.nz/index.html).
+
+### R Markdown
+
+[R Markdown](https://rmarkdown.rstudio.com/) je ono što koristimo da bismo razvili ove sveščice. Evo knjige iz koje se može naučiti rad u toj jednostavnoj ekstenziji R: [R Markdown: The Definitive Guide, Yihui Xie, J. J. Allaire, Garrett Grolemunds.](https://bookdown.org/yihui/rmarkdown/). 
+

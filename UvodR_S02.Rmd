@@ -1,0 +1,132 @@
+---
+title: "Uvod u R - Sesija02"
+author:
+- name: Goran S. Milovanović, PhD
+  affiliation: DataKolektiv, Data Scientist & Vlasnik
+output:
+  html_document:
+    df_print: paged
+---
+
+![](DK_Logo_White_150.png)
+
+***
+# Sesija 02: Tipovi podataka u R i data.frame klasa
+ 
+**Fidbek** se upućuje na `goran.milovanovic@datakolektiv.com`. 
+Ova sveščica prati kurs Uvod u R programiranje za analizu podataka 2020/21.
+
+***
+
+U našoj Sesiji 02 nastavljamo da pravimo pregled nekih tipova podataka u R i bavimo se i dalje `data.frame` klasom. Pozbavićemo se dodatno i listama koje smo videli prošli put i opet ćemo malo da trčimo pred rudu da vidimo šta je to [{dplyr}](https://dplyr.tidyverse.org/) paket u [{tidyverse}](https://www.tidyverse.org/) pristup R programiranju. Da ne zaboravim: ulazi na scenu predivna `lapply()` funkcija, a videćemo i kako se pišu naše funkcije u R!
+
+
+### 0. Liste, `data.frame` i `lapply()`
+
+Funkcija `library()` u R poziva određeni *paket* (*biblioteku*): najednostavnije rečeno, to je skup nekih dodatnih funkcija koje možemo da koristimo u našem radu. Paket {tidyverse} okuplja veliki broj drugih paketa u sebi od kojih su najpoznatiji {dplyr}, {tidyr} i {ggplot2}.
+
+Vraćamo se `iris` skupu podataka:
+
+```{r echo = T, eval = T, message = F}
+library(tidyverse)
+data(iris)
+head(iris, 10)
+```
+
+Hajde da iz `iris` isečemo jedan podskup koji će ponovo biti data.frame: samo posmatranja koja na varijabli `Species` imaju vrednost `setosa`. To radimo ovako:
+
+```{r echo = T, eval = T, message = F}
+setosa_frame <- iris[iris$Species == 'setosa', ]
+dim(setosa_frame)
+```
+
+```{r echo = T, eval = T, message = F}
+head(setosa_frame)
+```
+
+Jednostavna linearna regresija kojom hoćemo da proverimo da li na osnovu `setosa_frame$Sepal.Length` možemo da predvidimo `setosa_frame$Petal.Length`:
+
+```{r echo = T, eval = T, message = F}
+model <- lm(setosa_frame$Petal.Length ~ setosa_frame$Sepal.Length, 
+            data = setosa_frame) 
+```
+
+Koje klase je varijbla `model`:
+
+```{r echo = T, eval = T, message = F}
+class(model)
+```
+
+Klasa `lm` je skraćeno od "linear model". Funkcija `lm()` može da izgradi najrazličitije linearne modele u R.
+
+Koristimo {ggplot2} koji učimo iz knjige da napravimo skaterplot dve varijable koje smo koristili u modelu:
+
+```{r echo = T, eval = T, message = F}
+ggplot(data = setosa_frame, 
+       aes(x = Sepal.Length, 
+           y = Petal.Length)) + 
+  geom_smooth(method = "lm", size = .25, color = "red") + 
+  geom_point(size = 1.5, color = "red") + 
+  geom_point(size = 1, color = "white") + 
+  theme_bw()
+```
+
+Šta je prednost R u odnosu na upotrebu klasičnog statističkog softvera? Automatizacija poslova, pored fleksibilnosti upravljanja podacima, je sigurno ključna stvar. Videli smo da u `iris` postoje tri podskupa po varijabli `Species`: `setosa`, `virginica`, i `versicolor`. Zamislite da hoću da izvedem tri linearne regresije, svaki put pokušavajući da predvidim varijablu `Petal.Length` na osnovu varijable `Sepal.Length`, ali tako prvi put radim samo na podskupu `setosa`, drugu regresiju samo na podskupu `virginica`, i treću na `versicolor`. Kako radim: formulišem jednu po jednu regresionu analizu?
+
+Naravno, ne. To je R.
+
+Sledeći kod: `iris_species <- unique(as.character(iris$Species))` već razumemo iz prethodnih sesija. On nam daje sve jedinstvene elemente kolone `iris$Species`; pozive funkciji `as.character()` služi za konverziju tipa faktor u tip karakter (diskutujemo tokom sesije ovo).
+
+Funkcija `lapply()` koju koristimo posle je jedna od najvažnijih funkcija u programskom jeziku R:
+
+```{r echo = T, eval = T, message = F}
+iris_species <- unique(as.character(iris$Species))
+models <- lapply(iris_species, function(x) {
+  dataset <- filter(iris, Species == x)
+  model <- lm(dataset$Petal.Length ~ dataset$Sepal.Length, 
+              data = dataset)
+  return(model)
+})
+names(models) <- iris_species
+```
+
+Šta radi poziv funkciji `lapply()`? Ova funkcija primenjuje funkciju definisanu u svom pozivu na sve elemente nekog vektora ili liste. Taj vektor je u našem primeru `iris_species` koji smo dobili prethodnim izdvajanjem svih jedinstvenih vrednosti iz kolone `iris$Species`. Funkcija koja će biti primenjena na svaki element tog vektora u `lapply()` pozivu je definisana u samom `lapply()` pozivu i izgleda ovako:
+
+```{r echo = T, eval = F, message = F}
+function(x) {
+  dataset <- filter(iris, Species == x)
+  model <- lm(dataset$Petal.Length ~ dataset$Sepal.Length, 
+              data = dataset)
+  return(model)
+}
+```
+
+Dakle, `lapply()` će na svaki element u `iris_species` primeniti ovu funkciju unutar koje se pozivom funkciji `filter()` iz {dplyr} paketa prvo uzimaju sve vrednosti `Species == x`, a zatim se pozivna funkcija linearnog modela `lm()` na dobijeni podskup skupa podataka `iris`. Kako `x` u pozivu funkcije kroz `lapply()` poziv sukcesivno uzima jednu po jednu vrednost iz `iris_species`, rezultat poziva će biti lista - `lapply()` uvek vraća listu rezultata! - koja sadrži kao svoje elemente jedan po jedan regresioni model ovako dobijen! 
+
+Na primer, drugi dobijeni regresioni model je:
+
+```{r echo = T, eval = T, message = F}
+summary(models$versicolor)
+```
+
+Da se malo vratimo klasičnom programiranju koje smo nekada učili u školi (makar BASIC): da smo nešto slično hteli da izvedemo FOR petljom, to bi u R izgledalo ovako:
+
+```{r echo = T, eval = T, message = F}
+for (i in 1:length(iris_species)) {
+  dataset <- filter(iris, Species == iris_species[i])
+  model <- lm(dataset$Petal.Length ~ dataset$Sepal.Length, 
+              data = dataset)
+  print(summary(model))
+}
+```
+
+Ali u *funkcionalnom* programskom jeziku kao što je R nema potrebe ovo da radimo i u principu izbegavamo iteracije (petlje) gde god možemo!
+
+### Čitanje za narednu sesiju
+
+- Poglavlja 11 - 16 iz [R for Data Science, Hadley Wickham & Garrett Grolemund](https://r4ds.had.co.nz/index.html).
+
+### R Markdown
+
+[R Markdown](https://rmarkdown.rstudio.com/) je ono što koristimo da bismo razvili ove sveščice. Evo knjige iz koje se može naučiti rad u toj jednostavnoj ekstenziji R: [R Markdown: The Definitive Guide, Yihui Xie, J. J. Allaire, Garrett Grolemunds.](https://bookdown.org/yihui/rmarkdown/). 
+

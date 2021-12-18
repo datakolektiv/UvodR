@@ -1,0 +1,206 @@
+---
+title: "Uvod u R - Sesija01"
+author:
+- name: Goran S. Milovanović, PhD
+  affiliation: DataKolektiv, Data Scientist & Vlasnik
+---
+
+![](DK_Logo_White_150.png)
+
+***
+# Sesija 01: Uvod u programski jezik R i RStudio IDE
+ 
+**Fidbek** se upućuje na `goran.milovanovic@datakolektiv.com`. 
+Ova sveščica prati kurs Uvod u R programiranje za analizu podataka 2020/21.
+
+***
+
+U našoj Sesiji 01 počinjemo da pravimo uvod u programski jezik R. Malo ćemo trčati pred rudu da naučimo neke stvari. Povućićemo razliku između **base R** i [{tidyverse}](https://www.tidyverse.org/) pristupa R programiranju - oni se razlikuju ali zajedno rade fenomenalno! Diskutovaćemo neke osnovne stvari iz knjige [R for Data Science](https://r4ds.had.co.nz/index.html) i pokušati da procenimo koliko nam vremena treba za čitanje i savlađivanje materijala u njoj.
+
+
+### 0. Tipovi podataka u R
+
+Neki skupovi podataka dolaze sa programskim jezikom R, npr. čuveni `iris`:
+
+```{r echo = T, eval = T, message = F}
+data(iris)
+head(iris, 10)
+```
+
+Funkcija `head()`: pokaži mi prvih n redova u data.frame! Isto, funkcija `tail()`:
+
+```{r echo = T, eval = T, message = F}
+tail(iris, 10)
+```
+
+daje poslednjih n redova data.frame.
+
+```{r echo = T, eval = T, message = F}
+my_vector <- c(1, 7, 9, 10, 14, 22, 3.14, 2.71, 99)
+head(my_vector, 5)
+```
+
+```{r echo = T, eval = T, message = F}
+tail(my_vector, 5)
+```
+
+*Liste* su veoma važne u R. Napravimo jednu:
+
+```{r echo = T, eval = T, message = F}
+my_list <- list(element_1 = 1,
+                element_2 = "Beograd", 
+                element_3 = TRUE)
+str(my_list)
+```
+
+Funkcija `str()` u R je generička, što znači da može da se koristi na objektima *različitih klasa*. O tome ćemo još da diskutujemo tokom kursa.
+
+Evo još jedne liste, opis neke osobe:
+
+```{r echo = T, eval = T, message = F}
+person <- list(name = "Mark",
+               family_name = "Smith",
+               phone = "+381661722838383", 
+               email = "mark.smith@rcourses.org", 
+               age = 40,
+               gender = "M", 
+               employed = TRUE)
+person
+```
+
+Sve može biti element liste u R - čak i ceo data.frame:
+
+```{r echo = T, eval = T, message = F}
+person <- list(name = "Mark",
+               family_name = "Smith",
+               phone = "+381661722838383", 
+               email = "mark.smith@rcourses.org", 
+               age = 40,
+               gender = "M", 
+               employed = TRUE, 
+               favorite_dataset = "iris", 
+               favorite_dataset_source = iris)
+```
+
+Liste mogu da budu ugnježdene:
+
+```{r echo = T, eval = T, message = F}
+ll <- list(e1 = 10, 
+           e2 = 20, 
+           e3 = list(
+             e1 = 20,
+             e2 = 40,
+             e3 = 15
+           ), 
+           e4 = 40,
+           e5 = list(
+             e1 = 12
+           ))
+ll
+```
+
+Npr. struktura podataka za opis osoba putem R liste:
+
+```{r echo = T, eval = T, message = F}
+persons <- list(name = c("Mark", "Jane"),
+                family_name = c("Smith", "Doe"),
+                phone = c("+381661722838383", "+381661722838384"),
+                email = c("mark.smith@rcourses.org", "jane.doe@rcourses.org"), 
+                age = c(40, 42),
+                gender = c("M", "F"),
+                employed = c(TRUE, FALSE)
+                )
+```
+
+Pristup elementima liste:
+
+```{r echo = T, eval = T, message = F}
+persons[[1]]
+```
+
+Pristup elementima *imenovane* liste:
+
+```{r echo = T, eval = T, message = F}
+persons$family_name[2]
+```
+
+Logika struktuiranja podataka je *ključna stvar* u Data Science. Evo boljeg načina da listama opisujemo osobe, npr. zaposlene u nekoj firmi:
+
+```{r echo = T, eval = T, message = F}
+persons <- list(
+  p1 = list(name = "Mark",
+            family_name = "Smith",
+            phone = "+381661722838383",
+            email = "mark.smith@rcourses.org",
+            age = 40,
+            gender = "M",
+            employed = TRUE
+            ),
+  p2 = list(name = "Jane",
+            family_name = "Doe",
+            phone = "+381661722838385",
+            email = "jane.doe@rcourses.org",
+            age = 42,
+            gender = "F",
+            employed = FALSE
+            )
+)
+```
+
+Pristup elementima liste:
+
+```{r echo = T, eval = T, message = F}
+persons[[1]]
+```
+
+### 1. ```data.frame``` klasa
+
+Ova klasa je zapravo sama centralna stvar sa kojom radimo u programskom jeziku R:
+
+```{r echo = T, eval = T, message = F}
+str(iris)
+```
+
+Jedinstveni elementi varijable (kolone, polja, kako hoćete) `Species` u `iris` funkcijom `unique()`:
+
+```{r echo = T, eval = T, message = F}
+unique(iris$Species)
+```
+
+Gnježđenje poziva funkcija u R - ovo radimo baš često. Npr. "daj mi dužinu (length) vektora dobijenog nabrajanjem jedinstvenih elemenata (unique) kolone Sepal.Length iz iris" se u R piše ovako:
+
+```{r echo = T, eval = T, message = F}
+length(
+  unique(
+    iris$Sepal.Length
+    )
+  )
+```
+
+`length()` nam vraća dužinu vektora ili liste:ß
+
+```{r echo = T, eval = T, message = F}
+length(iris$Sepal.Length)
+```
+
+`dim()` nam daje dimenzije nekog data.frame npr:ß
+
+```{r echo = T, eval = T, message = F}
+dim(iris)
+```
+
+`dim()` vraća vektor (npr. broj redova i broj kolona za data.frame klasu); ne zaboravite da i sam rezultat neke funkcije u R možete da "sabsetujete", odn. uzmete indeksiranjem samo onaj deo rezultata koji vam treba; npr. koliko redova ima `iris`:
+
+```{r echo = T, eval = T, message = F}
+dim(iris)[1]
+```
+
+
+### Čitanje za narednu sesiju
+
+- Poglavlja 5 - 10 iz [R for Data Science, Hadley Wickham & Garrett Grolemund](https://r4ds.had.co.nz/index.html).
+
+### R Markdown
+
+[R Markdown](https://rmarkdown.rstudio.com/) je ono što koristimo da bismo razvili ove sveščice. Evo knjige iz koje se može naučiti rad u toj jednostavnoj ekstenziji R: [R Markdown: The Definitive Guide, Yihui Xie, J. J. Allaire, Garrett Grolemunds.](https://bookdown.org/yihui/rmarkdown/). 
+

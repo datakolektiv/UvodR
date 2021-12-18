@@ -1,0 +1,157 @@
+---
+title: "Uvod u R - Sesija03"
+author:
+- name: Goran S. Milovanović, PhD
+  affiliation: DataKolektiv, Data Scientist & Vlasnik
+output:
+  html_document:
+    df_print: paged
+---
+
+![](DK_Logo_White_150.png)
+
+***
+# Sesija 03: Kontrola toka u R + uvod u {dplyr} i {tidyverse}
+ 
+**Fidbek** se upućuje na `goran.milovanovic@datakolektiv.com`. 
+Ova sveščica prati kurs Uvod u R programiranje za analizu podataka 2020/21.
+
+***
+
+U Sesiji 03 bavimo se osnovama kontrole toka u R. To podrazumeva upoznavanje načina na koji se u ovom programskom jeziku donose odluke i kako se iteracijama ("petljama") automatizuju repetitivni zadaci. Pokazaćemo osnove `if... else...` konstrukcije u R, i upoznati `for`, `while`, i `repeat` petlje. Ne zaboravite: u funkcionalnom programskom jeziku kao što je R imamo na raspolaganju druga sredstva osim petlji i u suštini petlje želimo da koristimo što manje!
+
+### 0. Kontrola toka u programskom jeziku R
+
+Jednostavno donošenje odluke: ako je ispunjen određeni uslov uradi jedno, ako nije - uradi nešto drugo:
+
+```{r echo = T, eval = T, message = F}
+
+a <- 2
+
+if (a >= 5) {
+  print("a is larger or equal to 5.")
+} else {
+  print("a is lesser than 5.")
+}
+
+
+
+```
+
+Podsetnik:
+- u programskom jeziku R, uslov iza `if` mora da ide u zagrade, kao u kodu iznad;
+- `{` i `}` se koriste da označe početak i kraj bloka koda - skup instrukcija koje će biti izvršene u zavisnosti od toga kakva je odluka doneta u odnosu na uslov u `if` konstrukciji.
+
+A sad, nešto divno: *vektorizovano* odlučivanje u R pomoću `ifelse()` funkcije!
+
+```{r echo = T, eval = T, message = F}
+data(iris)
+iris$LongSepalLength <- 
+  ifelse(iris$Sepal.Length >= 4.8, "long", "short")
+head(iris)
+```
+
+Zadatak: hoćemo da isprintamo kvadarate svih parnih brojeva do 100. Prvo rešenje, pomoću `for` petlje:
+
+```{r echo = T, eval = T, message = F}
+my_vec <- seq(2, 100, by = 2)
+my_vec_sq <- numeric(length = length(my_vec))
+
+for (i in 1:length(my_vec)) {
+  
+  my_vec_sq[i] <- my_vec[i]^2
+  
+}
+my_vec_sq
+```
+
+Vektorizovana forma: kao i sve ostalo, operacija (preciznije, u R je to funkcija) stepenovanja...
+
+```{r echo = T, eval = T, message = F}
+my_vec_sq <- my_vec ^ 2
+my_vec_sq
+```
+
+Konačno, forma sa upotrebom `lapply()` funkcije:
+
+```{r echo = T, eval = T, message = F}
+my_vec_sq <- lapply(my_vec, function(x) {
+  x ^ 2
+})
+my_vec_sq <- unlist(my_vec_sq)
+my_vec_sq
+```
+
+Pošto `lapply()` uvek vraća listu, morali smo da iskoristimo u gornjem kodu `unlist()` kako bismo dobili vektor kao rezultat. Funkcija `sapply()`, bliska rođaka `lapply()`, pojednostavljuje rezultat te funkcije u vektor automatski:
+
+```{r echo = T, eval = T, message = F}
+my_vec_sq <- sapply(my_vec, function(x) {
+  x ^ 2
+})
+my_vec_sq
+```
+
+Evo i `repeat` petlje:
+
+```{r echo = T, eval = T, message = F}
+# - repeat petlja
+a <- 0
+repeat {
+  
+  a <- a + 1
+  print(a)
+  
+  # - condition
+  if (a >= 10) {
+    break
+  }
+
+}
+
+```
+
+**Ne zaboravite:** u programskom jeziku R morate eksplicitno sami da uvedete uslov za izlazak iz `repeat` petlje; ako ga nema - dobija se beskonačna petlja!
+
+Sintaksička konstrukcija `while` petlje u R izgleda ovako:
+
+```{r echo = T, eval = T, message = F}
+a <- 10
+
+while (a > 1) {
+  print(a)
+  a <- a - 1
+}
+
+```
+
+Upotreba `break` kako bi se izašlo iz petlje:
+
+```{r echo = T, eval = T, message = F}
+a <- seq(1, 100, by = 1)
+for (i in 1:length(a)) {
+  
+  if (a[i] %% 2 == 0) {
+    
+    print(paste0("Square is: ", a[i]^2))
+    
+  }
+  
+  if (a[i] == 50) {
+      
+    break
+  
+  }
+  
+}
+```
+
+Instrukcije `break` i `next`, za izlazak iz petlje i za prelazak u narednu iteraciju, mogu da se koriste i u `repeat` i `while` petljama.
+
+### Čitanje za narednu sesiju
+
+- Poglavlja 17 - 19 iz [R for Data Science, Hadley Wickham & Garrett Grolemund](https://r4ds.had.co.nz/index.html).
+
+### R Markdown
+
+[R Markdown](https://rmarkdown.rstudio.com/) je ono što koristimo da bismo razvili ove sveščice. Evo knjige iz koje se može naučiti rad u toj jednostavnoj ekstenziji R: [R Markdown: The Definitive Guide, Yihui Xie, J. J. Allaire, Garrett Grolemunds.](https://bookdown.org/yihui/rmarkdown/). 
+
