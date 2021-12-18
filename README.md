@@ -1,2 +1,3 @@
 # UvodR
-Otvoreni, veoma uvodni kurs R programiranja
+
+![](DK_Logo_White_150.png)
