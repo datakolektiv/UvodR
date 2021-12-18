@@ -6,7 +6,7 @@ Repo sadrži sve [R markdown](https://rmarkdown.rstudio.com/) sveščice koje ko
 
 Web: [Uvod u R, DataKolektiv Server Pages](http://datakolektiv.org/app_direct/uvodr/)
 
-Sve je GPLv2 licencirano.
+Sav kod je GPLv2 licenciran.
 
 [DataKolektiv 2021/22.](https://datakolektiv.com/)
 
